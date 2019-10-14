@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload.min.js"></script>
+<script type="text/javascript">
+    var app = angular.module('MyApp', ['ngFileUpload']);
+    app.controller('MyController', function ($scope, $window) {
+
+        $scope.SelectFile = function (file) {
+            $scope.SelectedFile = file;
+        };
+
+        $scope.Upload = function () {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var items = [];
+                var rows = e.target.result.split("\r\n");
+                for (var i = 0; i < rows.length; i++) {
+                    var cells = rows[i].split(",");
+                    if (cells.length > 1) {
+                        var item = {};
+                        item.ItemId = cells[0];
+                        item.ItemNumber = cells[1];
+                        item.ItemNumber_old = cells[2];
+                        item.Description = cells[3];
+                        item.Short_Desc = cells[4];
+                        item.BrandID = cells[5];
+                        item.Brand = cells[6];
+                        item.CategoryID = cells[7];
+                        item.Category = cells[8];
+                        item.Barcode = cells[9];
+                        item.Origin_Country = cells[10];
+                        item.img_filename = cells[11];
+                        item.logo_filename = cells[12];
+                        item.DateAdded = cells[13];
+                        item.InCatalog = cells[14];
+                        item.HF_UOM = cells[15];
+                        item.SRP = cells[16];
+                        item.CaseSRP = cells[17];
+                        item.ProductFeatureA = cells[18];
+                        item.ProductFeatureB = cells[19];
+                        item.ProductFeatureC = cells[20];
+                        item.ProductFeatureD = cells[21];
+                        item.ProductFeatureE = cells[22];
+                        items.push(item);
+                        $scope.$apply(function () {
+                            $scope.items = items;
+                            $scope.IsVisible = true;
+                        });
+                    }
+                }
+
+            };
+            reader.readAsText($scope.SelectedFile);
+        };
+
+
+        $scope.LoadPicLocation = function () {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var pictures = [];
+                var rows2 = e.target.result.split("\r\n");
+                for (var i = 0; i < rows2.length; i++) {
+                    var cells2 = rows2[i].split(",");
+                    if (cells2.length > 1) {
+                        var pics = {};
+                        pics.SKU = cells2[0];
+                        pics.Name = cells2[1];
+                        pics.IsDefault = cells2[2];
+                        pics.Hash = cells2[3];
+                        pics.URL = cells2[4];
+                        pictures.push(pics);
+                        $scope.$apply(function () {
+                            $scope.pictures = pictures;
+                            $scope.IsVisible = true;
+                        });
+                    }
+                }
+
+            };
+            reader.readAsText($scope.SelectedFile);
+        }
+
+
+    });
+
+
+</script>
+
+<div ng-app="MyApp" ng-controller="MyController">
+    <p><input ngf-select="SelectFile($file)" type="file"></p>
+    <p><input ng-click="Upload()" type="button" value="Load Items dropdown menu"></p>
+    <p><input ng-click="LoadPicLocation()" type="button" value="Load Pictures dropdown menu"></p>
+    <p></p>
+
+    <p>Choose Item:
+        <select ng-model="selectedItem" ng-options="x.Short_Desc for x in items">
+        </select>
+    </p>
+
+    <p>Get pictures.SKU=items.ItemNumber pictures URLs:
+        <select ng-model="selectedItemPic" ng-options="x.SKU for x in pictures">
+        </select>
+    </p>
+
+    <p></p>
+
+    <table id="tblItemsChosen" style:
+    "width="100%"" cellpadding="3" cellspacing="0" border="1px solid black" text-align=left ng-show="IsVisible">
+    <!--  Table headers   -->
+    <tr>
+        <th>Image</th>
+        <th>Barcode</th>
+        <th>MSRP</th>
+        <th>Brand</th>
+        <th>ItemId</th>
+        <th>Item Number (SKU)</th>
+        <th>Description</th>
+        <th>Features</th>
+        <th>Video?</th>
+        <th>URL from Pictures</th>
+    </tr>
+    <tbody>
+    <!--  Table data   -->
+    <tr>
+        <td><img height="150" src={{'./video/'+selectedItem.img_filename}} width="150"></td>
+        <td>{{selectedItem.Barcode}}</td>
+        <td>{{selectedItem.SRP|currency}}</td>
+        <td>{{selectedItem.Brand}}</td>
+        <td>{{selectedItem.ItemId}}</td>
+        <td>{{selectedItem.ItemNumber}}</td>
+        <td>{{selectedItem.Description}}</td>
+        <td>{{selectedItem.ProductFeatureA}}. &nbsp {{selectedItem.ProductFeatureB}}. &nbsp
+            {{selectedItem.ProductFeatureC}}. &nbsp {{selectedItem.ProductFeatureD}}. &nbsp
+            {{selectedItem.ProductFeatureE}}.
+        </td>
+        <td><img height="300" src={{'./video/'+selectedItem.logo_filename}} width="300"></td>
+        <!--  <video src=...   type="video/mov" for mov files, type="video/mp4" for mp4 files -->
+        <td><img height="150" src={{selectedItemPic.URL}} width="150"></td>
+    </tr>
+    </tbody>
+    </table>
+    <p></p>
+
+
+    <p>Choose Picture:
+        <select ng-model="selectedPic" ng-options="x.SKU for x in pictures">
+        </select>
+    </p>
+    <p></p>
+
+    <table id="tblItemsChosenPics" style:
+    "width="100%"" cellpadding="3" cellspacing="0" border="1px solid black" text-align=left ng-show="IsVisible">
+    <!--  Table headers   -->
+    <tr>
+        <th>URL</th>
+        <th>SKU (Item Number)</th>
+        <th>Name</th>
+        <th>IsDefault</th>
+        <th>Hash</th>
+        <th>Pic</th>
+    </tr>
+    <tbody>
+    <!--  Table data   -->
+    <tr>
+        <td>{{selectedPic.URL}}></td>
+        <td>{{selectedPic.SKU}}</td>
+        <td>{{selectedPic.Name}}</td>
+        <td>{{selectedPic.IsDefault}}</td>
+        <td>{{selectedPic.Hash}}</td>
+        <td><img height=300 src={{selectedPic.URL}} width=300</td>
+    </tr>
+    </tbody>
+    </table>
+    <p></p>
+
+ <!--
+    <li ng-repeat="x in pictures">
+      {{x.URL + x.SKU}}</li>
+
+    <p>Pics - </p>
+    <li ng-repeat="i in pictures">
+    {{'SKU: ' + i.SKU}}
+    {{', Name: ' + i.Name}}
+    {{', Is Default: ' + i.IsDefault}}
+    {{', Hash: ' + i.Hash}}
+    {{', URL: ' + i.URL}}
+    </li>
+
+
+   <p>Items for input- </p>
+      <li ng-repeat="x in items">
+    {{'{ id: ' + x.ItemId + ', name: '+ x.Short_Desc + ' },'}}
+    </li>
+-->
+
+    <p>Items - </p>
+      <li ng-repeat="x in items">
+    {{'{ id: ' + x.ItemId  + ', ItemNumber: ' + x.ItemNumber + ', ItemNumber_old: '+ x.ItemNumber_old}}
+    {{', Description: '+ x.Description + ', name: '+ x.Short_Desc}}
+    {{', BrandID: '+ x.BrandID + ', Brand: '+ x.Brand + ', CategoryID: '+ x.CategoryID + ', Category: '+ x.Category}}
+    {{', Barcode: '+ x.Barcode + ', Origin_Country: ' + x.Origin_Country}}
+    {{', img_filename: ' + x.img_filename + ', logo_filename: ' + x.logo_filename}}
+    {{', DateAdded: ' + x.DateAdded|date}}
+    {{', InCatalog: ' + x.InCatalog + ', HF_UOM: ' + x.HF_UOM}}
+    {{', SRP: ' + x.SRP}}
+    {{', CaseSRP: ' + x.CaseSRP}}
+    {{', ProductFeatureA: '+ x.ProductFeatureA + ', ProductFeatureB: ' + x.ProductFeatureB + ', ProductFeatureC: '+ x.ProductFeatureC + ', ProductFeatureD: ' + x.ProductFeatureD + ', ProductFeatureE: ' + x.ProductFeatureE + ' },'}}
+    </li>
+   
+
+
+
+
+
+    <p></p>
+    <small>
+        <p>Note:</p>
+        <p> &nbsp &nbsp 1) Use "Browse" button to locate "Original 100 Hydrofarm items.csv" file.</p>
+        <p> &nbsp &nbsp 2) Choose "Load Items dropdown menu" button to populate the item dropdown menu.</p>
+        <p> &nbsp &nbsp 3) Choose "Propagation Heat Mat 48 x12 Da" from Short_Desc dropdown list to see pic and
+            video?</p>
+        <p> &nbsp &nbsp 4) Use "Browse" button to locate "HF_imagedata first 100.csv" file.</p>
+        <p> &nbsp &nbsp 5) Choose "Load Pictures dropdown menu" button to populate the picture dropdown menu.</p>
+        <p> &nbsp &nbsp 6) Choose "19007" from SKU dropdown list to see pic</p>
+        <p> Gotta find a better way: 1) include 10 pic URLs in items array 2) do automatic lookup and display all pics
+            for this item
+    </small>
+    <p></p>
+</div>
+</html>
+
+
